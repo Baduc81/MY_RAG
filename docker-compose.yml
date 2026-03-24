@@ -1,0 +1,56 @@
+version: "3.9"
+
+services:
+  # ── Qdrant vector database ─────────────────────────────────────────────────
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: rag-qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    restart: unless-stopped
+
+  # ── Python backend (FastAPI) ───────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: rag-backend
+    ports:
+      - "8000:8000"
+    environment:
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      TEXT_MODEL: ${TEXT_MODEL:-qwen2.5:7b-instruct}
+      VISION_MODEL: ${VISION_MODEL:-llama3.2-vision:11b}
+      EMBED_MODEL: ${EMBED_MODEL:-nomic-embed-text}
+      ENABLE_VISION: ${ENABLE_VISION:-false}
+      QDRANT_URL: http://qdrant:6333
+      COLLECTION_NAME: ${COLLECTION_NAME:-rag_docs}
+      UPLOADS_DIR: /app/uploads
+      INGEST_TRACKING_FILE: /app/uploads/ingested_files.json
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      - qdrant
+    restart: unless-stopped
+    # Allow backend to reach Ollama running on the host machine
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # ── React frontend (nginx) ─────────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: rag-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+# ── Named volumes ──────────────────────────────────────────────────────────
+volumes:
+  qdrant_storage:
+  uploads:

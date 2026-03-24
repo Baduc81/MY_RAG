@@ -1,0 +1,44 @@
+# ── Python / backend ─────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+venv/
+.venv/
+env/
+*.egg
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+*.so
+
+# ── Node / frontend ──────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+
+# ── Docker / runtime data ────────────────────────────
+uploads/
+qdrant_storage/
+
+# ── Environment files ────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── Editor / OS ──────────────────────────────────────
+.DS_Store
+.vscode/
+*.swp
+*.swo
+Thumbs.db
+
+# ── Jupyter artifacts ────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+chunks_export.json
+retrieved_chunks_*.json
+ingested_files.json
