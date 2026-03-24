@@ -11,6 +11,8 @@ answer = ask("What is this document about?")
 
 from __future__ import annotations
 
+import json
+
 from rag_core import config
 from rag_core.generation import generate_answer
 from rag_core.ingestion import (
@@ -23,6 +25,39 @@ from rag_core.ingestion import (
     summarize_chunks,
 )
 from rag_core.retrieval import retrieve
+
+
+def _extract_chunk_debug_info(chunks: list) -> list[dict]:
+    """Return a JSON-serializable view of retrieved chunks used for generation."""
+    context_chunks: list[dict] = []
+
+    for idx, chunk in enumerate(chunks, start=1):
+        source_file = chunk.metadata.get("source_file") if chunk.metadata else None
+        raw_text = chunk.page_content
+        tables_html: list = []
+        has_images = False
+
+        if chunk.metadata and "original_content" in chunk.metadata:
+            try:
+                original = json.loads(chunk.metadata["original_content"])
+                raw_text = original.get("raw_text", raw_text)
+                tables_html = original.get("tables_html", [])
+                has_images = bool(original.get("images_base64", []))
+            except Exception:
+                # Keep fallback values if metadata payload cannot be decoded.
+                pass
+
+        context_chunks.append(
+            {
+                "index": idx,
+                "source_file": source_file,
+                "text": raw_text,
+                "tables_html": tables_html,
+                "has_images": has_images,
+            }
+        )
+
+    return context_chunks
 
 
 def ingest_file(file_path: str, force: bool = False) -> dict:
@@ -80,3 +115,13 @@ def ask(query: str, k: int = 5) -> str:
     """
     chunks = retrieve(query, k=k)
     return generate_answer(query, chunks)
+
+
+def ask_with_context(query: str, k: int = 5) -> dict:
+    """Run retrieval + generation and return answer with the chunks used."""
+    chunks = retrieve(query, k=k)
+    answer = generate_answer(query, chunks)
+    return {
+        "answer": answer,
+        "context_chunks": _extract_chunk_debug_info(chunks),
+    }

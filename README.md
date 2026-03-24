@@ -20,10 +20,10 @@ modern dark-theme chat UI. All AI inference is performed through
 └───────────┬──────────────────────┬──────────────────┘
             │                      │
 ┌───────────▼──────┐   ┌───────────▼──────────────────┐
-│  Qdrant          │   │  Ollama (host machine)        │
-│  Vector DB       │   │  • nomic-embed-text           │
-│  port 6333       │   │  • qwen2.5:7b-instruct        │
-└──────────────────┘   │  • llama3.2-vision:11b (opt.) │
+│  Qdrant          │   │  Ollama (host machine)       │
+│  Vector DB       │   │  • nomic-embed-text          │
+│  port 6333       │   │  • qwen2.5:7b-instruct       │
+└──────────────────┘   │  • llama3.2-vision:11b (opt.)│
                        └──────────────────────────────┘
 ```
 
@@ -119,20 +119,27 @@ Or use the **Reset** button in the UI → `POST /api/reset`.
 ## Development (without Docker)
 
 ```bash
-# Backend
-cd /path/to/MY_RAG
+# Terminal 1: Qdrant (nếu chưa cài local thì chạy bằng docker riêng)
+docker run -p 6333:6333 qdrant/qdrant
+
+# Terminal 2: Backend local
+cd /home/luminous/Project/Rag-for-beginner/MY_RAG
 pip install -r backend/requirements.txt
 
-# Set env vars
-export OLLAMA_BASE_URL=http://localhost:11434
+# Sửa .env thành localhost (hoặc tạm đổi tên .env)
+# OLLAMA_BASE_URL=http://localhost:11434
+
 export QDRANT_URL=http://localhost:6333
 export UPLOADS_DIR=/tmp/rag-uploads
 export INGEST_TRACKING_FILE=/tmp/rag-uploads/ingested_files.json
+export OLLAMA_BASE_URL=http://localhost:11434
+uvicorn backend.main:app --reload --port 8000
 
-uvicorn backend.main:app --reload
+# Terminal 3:
+ollama serve
 
-# Frontend (separate terminal)
+# Terminal 4: Frontend
 cd frontend
 npm install
-npm run dev   # opens http://localhost:5173 with /api proxy to :8000
+npm run dev
 ```

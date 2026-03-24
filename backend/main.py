@@ -20,7 +20,7 @@ from typing import List
 
 from fastapi import BackgroundTasks, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 # Ensure rag_core is importable (it lives one level up from /app/backend)
 import sys
@@ -33,7 +33,7 @@ from rag_core.ingestion import (
     remove_ingested_file,
     reset_vector_store,
 )
-from rag_core.pipeline import ask, ingest_file
+from rag_core.pipeline import ask_with_context, ingest_file
 
 # ---------------------------------------------------------------------------
 # App
@@ -62,8 +62,17 @@ class ChatRequest(BaseModel):
     k: int = 5
 
 
+class ContextChunk(BaseModel):
+    index: int
+    source_file: str | None = None
+    text: str
+    tables_html: List[str] = Field(default_factory=list)
+    has_images: bool = False
+
+
 class ChatResponse(BaseModel):
     answer: str
+    context_chunks: List[ContextChunk] = Field(default_factory=list)
 
 
 class DocumentInfo(BaseModel):
@@ -154,8 +163,11 @@ def chat(request: ChatRequest):
             detail="No documents have been uploaded yet. Please upload documents first.",
         )
 
-    answer = ask(request.query, k=request.k)
-    return {"answer": answer}
+    result = ask_with_context(request.query, k=request.k)
+    return {
+        "answer": result["answer"],
+        "context_chunks": result.get("context_chunks", []),
+    }
 
 
 @app.post("/api/reset")

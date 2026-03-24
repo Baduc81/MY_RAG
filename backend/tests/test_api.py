@@ -74,6 +74,20 @@ def test_chat_no_documents_uploaded():
     assert "No documents" in response.json()["detail"]
 
 
+def test_chat_success_with_context_chunks(monkeypatch):
+    from main import load_ingested_files
+
+    monkeypatch.setattr("main.load_ingested_files", lambda: {"test.pdf"})
+
+    response = client.post("/api/chat", json={"query": "What is inside?", "k": 3})
+    assert response.status_code == 200
+
+    data = response.json()
+    assert data["answer"] == "Mock answer"
+    assert isinstance(data["context_chunks"], list)
+    assert data["context_chunks"][0]["text"] == "Mock chunk text"
+
+
 # ---------------------------------------------------------------------------
 # Reset
 # ---------------------------------------------------------------------------

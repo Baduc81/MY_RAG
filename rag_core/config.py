@@ -6,7 +6,9 @@ All values are read from environment variables with sensible defaults.
 import os
 from dotenv import load_dotenv
 
-load_dotenv(override=True)
+# Keep shell-exported variables higher priority than .env file values.
+# This avoids accidental Docker-oriented values overriding local dev settings.
+load_dotenv(override=False)
 
 # Ollama
 OLLAMA_BASE_URL: str = os.getenv("OLLAMA_BASE_URL", "http://ollama:11434")

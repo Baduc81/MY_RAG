@@ -16,6 +16,17 @@ export default function ChatInterface({ apiBase, documents, onDocumentsChange })
   const bottomRef = useRef(null)
   const textareaRef = useRef(null)
 
+  const normalizeContextChunks = (chunks) => {
+    if (!Array.isArray(chunks)) return []
+    return chunks.map((chunk, idx) => ({
+      index: Number(chunk?.index) || idx + 1,
+      source_file: chunk?.source_file || null,
+      text: chunk?.text || '',
+      tables_html: Array.isArray(chunk?.tables_html) ? chunk.tables_html : [],
+      has_images: Boolean(chunk?.has_images),
+    }))
+  }
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
@@ -40,10 +51,16 @@ export default function ChatInterface({ apiBase, documents, onDocumentsChange })
       const answer = res.ok
         ? data.answer
         : data.detail || 'Something went wrong. Please try again.'
+      const contextChunks = res.ok ? normalizeContextChunks(data.context_chunks) : []
 
       setMessages((prev) => [
         ...prev,
-        { id: Date.now() + 1, role: 'assistant', content: answer },
+        {
+          id: Date.now() + 1,
+          role: 'assistant',
+          content: answer,
+          contextChunks,
+        },
       ])
     } catch {
       setMessages((prev) => [

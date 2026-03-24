@@ -118,3 +118,73 @@
 .message-markdown strong {
   color: var(--text-primary);
 }
+
+.message-context-wrap {
+  margin-top: 10px;
+}
+
+.message-context-btn {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary);
+  font-size: 12px;
+  border-radius: 8px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.message-context-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--accent);
+}
+
+.message-context-panel {
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.2);
+  display: grid;
+  gap: 10px;
+}
+
+.context-chunk {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.context-chunk-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  margin-bottom: 6px;
+}
+
+.context-chunk-text,
+.context-table-html {
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.22);
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.context-table-wrap {
+  margin-top: 8px;
+  display: grid;
+  gap: 6px;
+}
+
+.context-image-flag {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}

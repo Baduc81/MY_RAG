@@ -23,6 +23,18 @@ _ingestion.reset_vector_store.return_value = None
 
 _pipeline = MagicMock()
 _pipeline.ask.return_value = "Mock answer"
+_pipeline.ask_with_context.return_value = {
+    "answer": "Mock answer",
+    "context_chunks": [
+        {
+            "index": 1,
+            "source_file": "test.pdf",
+            "text": "Mock chunk text",
+            "tables_html": [],
+            "has_images": False,
+        }
+    ],
+}
 _pipeline.ingest_file.return_value = {
     "source_file": "test.pdf",
     "skipped": False,
