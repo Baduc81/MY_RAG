@@ -1,0 +1,22 @@
+version: "3.9"
+
+services:
+  # Ollama runs as a container on EC2 so backend can call it via internal Docker DNS.
+  ollama:
+    image: ollama/ollama:latest
+    container_name: rag-ollama
+    volumes:
+      - ollama_models:/root/.ollama
+    restart: unless-stopped
+    # If your EC2 has NVIDIA GPU + nvidia-container-toolkit, uncomment the next line.
+    # gpus: all
+
+  backend:
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+    depends_on:
+      - qdrant
+      - ollama
+
+volumes:
+  ollama_models:
