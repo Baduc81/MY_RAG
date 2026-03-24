@@ -75,8 +75,6 @@ def test_chat_no_documents_uploaded():
 
 
 def test_chat_success_with_context_chunks(monkeypatch):
-    from main import load_ingested_files
-
     monkeypatch.setattr("main.load_ingested_files", lambda: {"test.pdf"})
 
     response = client.post("/api/chat", json={"query": "What is inside?", "k": 3})
